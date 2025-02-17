@@ -144,6 +144,34 @@ class UserRepository extends EntityRepository
         $user = $this->findByEmail($email);
         return $user ? $user->getIsConfirmed() : false;
     } 
+
+
+public function findByResetToken(string $token): ?User
+{
+    return $this->findOneBy(['resetToken' => $token]);
+}
+
+public function createPasswordResetToken(User $user): string
+{
+    $token = bin2hex(random_bytes(32));
+    $expires = new \DateTime('+1 hour');
+    
+    $user->setResetToken($token);
+    $user->setResetTokenExpires($expires);
+    $this->save($user);
+    
+    return $token;
+}
+
+public function resetPassword(User $user, string $newPassword): void
+{
+    $user->setPassword(password_hash($newPassword, PASSWORD_BCRYPT));
+    $user->setResetToken(null);
+    $user->setResetTokenExpires(null);
+    $this->save($user);
+}
+
+
     
     
 }

@@ -127,79 +127,61 @@ include_once 'templates/header.php';
 												<tbody class="fw-semibold text-gray-600">
         <?php
         // Recursive function to render categories and subcategories
-        function renderCategoryRow(Category $category, int $level = 0)
-        {
-            // Indent subcategories visually
-            $indent = str_repeat('&nbsp;&nbsp;&nbsp;', $level);
+        // Recursive function to render categories and subcategories in a table row with clear indentation
+function renderCategoryRow(Model\Category $category, int $level = 0)
+{
+    // Calculate left padding (e.g., 20px per level)
+    $padding = $level * 20;
+    
+    echo '<tr>';
+    echo '<td>';
+    echo '<div class="form-check form-check-sm form-check-custom form-check-solid">';
+    echo '<input class="form-check-input" type="checkbox" value="' . $category->getId() . '" />';
+    echo '</div>';
+    echo '</td>';
+    echo '<td>';
+    echo '<div class="d-flex align-items-center">';
+    // Thumbnail if available
+    if ($category->getThumbnail()) {
+        echo '<a href="#" class="symbol symbol-50px">';
+        echo '<span class="symbol-label" style="background-image:url(' . htmlspecialchars($category->getThumbnail()) . ');"></span>';
+        echo '</a>';
+    }
+    echo '<div class="ms-5" style="padding-left: ' . $padding . 'px;">';
+    echo '<a href="#" class="text-gray-800 text-hover-primary fs-5 fw-bold mb-1" data-kt-ecommerce-category-filter="category_name">';
+    echo htmlspecialchars($category->getName());
+    echo '</a>';
+    echo '</div>'; // End ms-5 div
+    echo '</div>'; // End d-flex div
+    echo '</td>';
+    echo '<td>';
+    if ($category->getDescription()) {
+        echo '<div class="text-muted fs-7 fw-bold">' . htmlspecialchars($category->getDescription()) . '</div>';
+    }
+    echo '</td>';
+    echo '<td class="text-end">';
+    echo '<a href="#" class="btn btn-sm btn-light btn-active-light-primary btn-flex btn-center" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">';
+    echo 'Actions <i class="ki-duotone ki-down fs-5 ms-1"></i>';
+    echo '</a>';
+    echo '<div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-125px py-4" data-kt-menu="true">';
+    echo '<div class="menu-item px-3">';
+    echo '<a href="edit_category.php?id=' . $category->getId() . '" class="menu-link px-3">Edit</a>';
+    echo '</div>';
+    echo '<div class="menu-item px-3">';
+    echo '<a href="add_subcategory.php?id=' . $category->getId() . '" class="menu-link px-3">Subcategory</a>';
+    echo '</div>';
+    echo '<div class="menu-item px-3">';
+    echo '<a href="javascript:void(0);" class="menu-link px-3" data-kt-ecommerce-category-filter="delete_row" data-category-id="' . $category->getId() . '">Delete</a>';
+    echo '</div>';
+    echo '</div>';
+    echo '</td>';
+    echo '</tr>';
 
-            echo '<tr>';
-            echo '<td>';
-            echo '<div class="form-check form-check-sm form-check-custom form-check-solid">';
-            echo '<input class="form-check-input" type="checkbox" value="' . $category->getId() . '" />';
-            echo '</div>';
-            echo '</td>';
-            echo '<td>';
-            echo '<div class="d-flex">';
-            echo '<!--begin::Thumbnail-->';
-            if ($category->getThumbnail()) {
-                echo '<a href="#" class="symbol symbol-50px">';
-                echo '<span class="symbol-label" style="background-image:url(' . htmlspecialchars($category->getThumbnail()) . ');"></span>';
-                echo '</a>';
-            }
-            echo '<!--end::Thumbnail-->';
-            echo '<div class="ms-5">';
-            echo '<!--begin::Title-->';
-            echo '<a href="#" class="text-gray-800 text-hover-primary fs-5 fw-bold mb-1" data-kt-ecommerce-category-filter="category_name">';
-            echo $indent . htmlspecialchars($category->getName());
-            echo '</a>';
-            echo '<!--end::Title-->';
-            echo '</div>';
-            echo '</div>';
-            echo '</td>';
-            echo '<td>';
-            echo '<!--begin::Badges-->';
-            echo '<div class="text-gray-800 text-hover-primary fs-5 fw-bold mb-1">';
-            if ($category->getDescription()) {
-                echo '<div class="text-muted fs-7 fw-bold">' . htmlspecialchars($category->getDescription()) . '</div>';
-            }
-            echo '</div>';
-            echo '<!--end::Badges-->';
-            echo '</td>';
-            echo '<td class="text-end">';
-            echo '<a href="#" class="btn btn-sm btn-light btn-active-light-primary btn-flex btn-center" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">';
-            echo 'Actions <i class="ki-duotone ki-down fs-5 ms-1"></i>';
-            echo '</a>';
-            echo '<!--begin::Menu-->';
-            echo '<div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-125px py-4" data-kt-menu="true">';
-            echo '<!--begin::Menu item-->';
-            echo '<div class="menu-item px-3">';
-            echo '<a href="edit_category.php?id=' . $category->getId() . '" class="menu-link px-3">Edit</a>';
-            echo '</div>';
-            echo '<!--end::Menu item-->';
-
-			echo '<!--begin::Menu item-->';
-            echo '<div class="menu-item px-3">';
-            echo '<a href="add_subcategory.php?id=' . $category->getId() . '" class="menu-link px-3">Subcategory</a>';
-            echo '</div>';
-            echo '<!--end::Menu item-->';
-
-			
-
-            echo '<!--begin::Menu item-->';
-            echo '<div class="menu-item px-3">';
-            echo '<a href="javascript:void(0);" class="menu-link px-3" data-kt-ecommerce-category-filter="delete_row" data-category-id="' . $category->getId() . '">Delete</a>';
-            echo '</div>';
-            echo '<!--end::Menu item-->';
-            echo '</div>';
-            echo '<!--end::Menu-->';
-            echo '</td>';
-            echo '</tr>';
-
-            // Render subcategories recursively
-            foreach ($category->getChildren() as $child) {
-                renderCategoryRow($child, $level + 1);
-            }
-        }
+    // Render subcategories recursively, increasing the indentation level
+    foreach ($category->getChildren() as $child) {
+        renderCategoryRow($child, $level + 1);
+    }
+}
 
         foreach ($categories as $category) {
             renderCategoryRow($category);

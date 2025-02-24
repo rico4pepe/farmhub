@@ -34,7 +34,7 @@ try{
 
          // Validate email format
          if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new \Exception('Invalid email format.');
+            throw new \Exception(message: 'Invalid email format.');
         }
 
  
@@ -43,11 +43,11 @@ try{
     $userRepo = new UserRepository($entityManager);
     if ($userRepo->findByEmail($email)) {
         throw new \Exception('Email already in use.');
-        exit;
+        
     }
     if ($userRepo->findByUsername($username)) {
         throw new \Exception('Username already in use.');
-        exit;
+        
     }
 
        // Hash password

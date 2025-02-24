@@ -46,17 +46,19 @@ class UserRepository extends EntityRepository
        return $qb->getQuery()->getResult();
    }
 
-   public function searchUsers(string $term): array
-   {
-       $qb = $this->createQueryBuilder('u')
-           ->where('u.username LIKE :term')
-           ->orWhere('u.email LIKE :term')
-           ->orWhere('u.firstName LIKE :term')
-           ->orWhere('u.lastName LIKE :term')
-           ->setParameter('term', '%' . $term . '%');
+public function searchUsers(string $term): array
+{
+    $qb = $this->createQueryBuilder('u')
+        ->where('LOWER(u.username) LIKE LOWER(:term)')
+        ->orWhere('LOWER(u.email) LIKE LOWER(:term)')
+        ->orWhere('LOWER(u.firstName) LIKE LOWER(:term)')
+        ->orWhere('LOWER(u.lastName) LIKE LOWER(:term)')
+        ->setParameter('term', '%' . strtolower($term) . '%');
            
-       return $qb->getQuery()->getResult();
-   }
+    return $qb->getQuery()->getResult();
+}
+
+
 
    public function countAll(): int
    {
@@ -73,18 +75,21 @@ class UserRepository extends EntityRepository
      * @return array
      */
     public function findByCustomCriteria(array $criteria): array
-    {
-        $queryBuilder = $this->createQueryBuilder('u');
-        
-        foreach ($criteria as $field => $value) {
-            if ($value) {
-                $queryBuilder->andWhere("u.$field = :$field")
-                             ->setParameter($field, $value);
-            }
+{
+    $allowedFields = ['username', 'email', 'firstName', 'lastName', 'isActive']; // Example allowed fields
+    $queryBuilder = $this->createQueryBuilder('u');
+    
+    foreach ($criteria as $field => $value) {
+        if ($value && in_array($field, $allowedFields)) {
+            // Using LOWER() for string fields if desired, or just "=" for exact matches
+            $queryBuilder->andWhere("u.$field = :$field")
+                         ->setParameter($field, $value);
         }
-
-        return $queryBuilder->getQuery()->getResult();
     }
+
+    return $queryBuilder->getQuery()->getResult();
+}
+
 
        /**
      * Find users who have not confirmed their email yet.

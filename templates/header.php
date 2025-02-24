@@ -1,5 +1,8 @@
 <?php
-session_start(); // Start the session for native PHP session handling
+// Start the session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Check if the user is logged in using native PHP sessions
 $user_logged_in = isset($_SESSION['user_id']); // Check if user_id is set in the session
